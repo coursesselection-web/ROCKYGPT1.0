@@ -1,0 +1,7 @@
+{
+  "name": "rockygpt1.0 Studio",
+  "description": "An AI studio to chat, compare, and create. Enhance photos, generate videos, fine-tune model parameters and experiment with prompts in a professional, modern interface.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

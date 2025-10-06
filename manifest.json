@@ -1,0 +1,21 @@
+{
+  "short_name": "rockygpt1.0 Studio",
+  "name": "rockygpt1.0 Studio",
+  "description": "An AI studio to chat, compare, and create. Enhance photos, generate videos, fine-tune model parameters and experiment with prompts in a professional, modern interface.",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#020617"
+}
