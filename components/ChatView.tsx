@@ -68,8 +68,9 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, activeModel, onSendMessag
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center h-full text-slate-500 p-8 text-center">
               <activeModel.icon className="w-16 h-16 mb-4"/>
-              <h3 className="text-2xl font-semibold text-slate-300">Start a conversation</h3>
-              <p>Ask me anything, or type a prompt below to get started.</p>
+              <h3 className="text-2xl font-semibold text-slate-300 mb-2">Start a conversation</h3>
+              <p className="text-slate-400 max-w-md mx-auto">rockygpt1.0 has 9 AI chatbots to do your task easily and flexibly 💪💪</p>
+              <p className="mt-2">Ask me anything, or type a prompt below to get started.</p>
             </div>
           )}
           <div>

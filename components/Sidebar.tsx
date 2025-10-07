@@ -1,7 +1,7 @@
 import React from 'react';
 import { AIModel, TaskType, ViewMode, ModelId, ChatSession } from '../types';
 import { AI_MODELS, TASK_TYPES } from '../constants';
-import { PlusIcon, NeuralSuiteIcon, CloseIcon } from './Icons';
+import { PlusIcon, NeuralSuiteIcon, CloseIcon, UserIcon, LogoutIcon } from './Icons';
 
 interface SidebarProps {
   viewMode: ViewMode;
@@ -14,6 +14,8 @@ interface SidebarProps {
   onSelectSession: (sessionId: string) => void;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
+  currentUser: string;
+  onLogout: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -26,7 +28,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     currentSessionId,
     onSelectSession,
     isSidebarOpen,
-    setIsSidebarOpen
+    setIsSidebarOpen,
+    currentUser,
+    onLogout
 }) => {
 
   const handleTaskSelect = (task: TaskType) => {
@@ -99,8 +103,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-800 transition-colors text-left"
               >
                 <task.icon className="w-5 h-5 text-slate-400" />
-                <div>
+                <div className="flex-1 flex justify-between items-center">
                   <p className="font-medium text-slate-200">{task.name}</p>
+                  {task.isPremium && (
+                    <span className="text-xs font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-md">PRO</span>
+                  )}
                 </div>
               </button>
             ))}
@@ -126,6 +133,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
           </div>
         )}
+
+        {/* Spacer to push content down */}
+        {viewMode !== ViewMode.CHAT && <div className="flex-1"></div>}
 
 
         {/* View Mode */}
@@ -166,13 +176,33 @@ const Sidebar: React.FC<SidebarProps> = ({
                   } ${!isInteractive ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <model.icon className="w-6 h-6" />
-                  <div>
+                  <div className="flex-1 flex justify-between items-center">
                     <p className="font-medium text-slate-200">{model.name}</p>
+                    {model.isPremium && (
+                      <span className="text-xs font-bold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-md">PRO</span>
+                    )}
                   </div>
                 </button>
               );
             })}
           </div>
+        </div>
+
+        {/* User Profile / Logout */}
+        <div className="mt-auto pt-4 border-t border-slate-800">
+            <div className="flex items-center gap-3 p-1">
+                <div className="w-9 h-9 flex items-center justify-center bg-slate-700 rounded-full">
+                    <UserIcon className="w-5 h-5 text-slate-300" />
+                </div>
+                <span className="font-semibold text-slate-200 flex-1 truncate">{currentUser}</span>
+                <button 
+                    onClick={onLogout} 
+                    aria-label="Logout"
+                    className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+                >
+                    <LogoutIcon className="w-5 h-5" />
+                </button>
+            </div>
         </div>
       </aside>
     </>

@@ -1,6 +1,6 @@
 // FIX: Removed `VideosOperation` from the import as it is not an exported member of '@google/genai'.
-import { GoogleGenAI, Modality } from "@google/genai";
-import { AIModel, ModelConfig } from '../types';
+import { GoogleGenAI, Modality, Type } from "@google/genai";
+import { AIModel, ModelConfig, WebAppCode } from '../types';
 
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable is not set.");
@@ -27,7 +27,7 @@ export const generateContent = async (prompt: string, modelPersonality: AIModel,
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: modelPersonality.apiModelName || 'gemini-2.5-flash',
       contents: prompt,
       config,
     });
@@ -41,10 +41,56 @@ export const generateContent = async (prompt: string, modelPersonality: AIModel,
   }
 };
 
-export const generateImage = async (prompt: string): Promise<string> => {
+export const generateWebApp = async (prompt: string, modelConfig?: ModelConfig): Promise<WebAppCode> => {
+    try {
+        const systemInstruction = `You are an expert web developer. Based on the user's prompt, generate the complete, standalone HTML, CSS, and JavaScript code for a functional web application.
+- The HTML body should not be empty.
+- The CSS should be modern and clean.
+- The JavaScript should not use any external frameworks and should be placed in the javascript field. Do not include <script> tags.
+- Ensure the code is self-contained and ready to run.
+- The response must be a valid JSON object matching the provided schema.`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                systemInstruction,
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        html: { type: Type.STRING, description: "The full HTML content, including <body> tags." },
+                        css: { type: Type.STRING, description: "The complete CSS for the application." },
+                        javascript: { type: Type.STRING, description: "The JavaScript code for the application logic." },
+                    },
+                    required: ["html", "css", "javascript"],
+                },
+                ...(modelConfig && {
+                    temperature: modelConfig.temperature,
+                    topP: modelConfig.topP,
+                    topK: modelConfig.topK,
+                    maxOutputTokens: modelConfig.maxOutputTokens,
+                }),
+            },
+        });
+
+        const jsonStr = response.text.trim();
+        return JSON.parse(jsonStr) as WebAppCode;
+
+    } catch (error) {
+        console.error("Error generating web app:", error);
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate app: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred while generating the web app.");
+    }
+};
+
+
+export const generateImage = async (prompt: string, model: string): Promise<string> => {
   try {
     const response = await ai.models.generateImages({
-      model: 'imagen-4.0-generate-001',
+      model: model,
       prompt: prompt,
       config: {
         numberOfImages: 1,
@@ -67,10 +113,10 @@ export const generateImage = async (prompt: string): Promise<string> => {
   }
 };
 
-export const editImage = async (prompt: string, imageBase64: string, mimeType: string): Promise<string> => {
+export const editImage = async (prompt: string, imageBase64: string, mimeType: string, model: string): Promise<string> => {
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: model,
       contents: {
         parts: [
           {
@@ -120,13 +166,14 @@ export const editImage = async (prompt: string, imageBase64: string, mimeType: s
 export const generateVideo = async (
   prompt: string, 
   image: { data: string; mimeType: string } | undefined,
-  onProgress: (message: string) => void
+  onProgress: (message: string) => void,
+  model: string
 ): Promise<string> => {
   try {
     onProgress("Starting video generation...");
     
     const requestPayload: any = {
-      model: 'veo-2.0-generate-001',
+      model: model,
       prompt: prompt,
       config: {
         numberOfVideos: 1
